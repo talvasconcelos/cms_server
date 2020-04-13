@@ -88,9 +88,17 @@ class Scanner extends EventEmitter {
       await prevPair;
       let pair = nextPair.id;
       let res = nextPair.ohlcv;
-      if (new Date(res[res.length - 1][0]).getHours() < new Date().getHours()) {
+      if (
+        new Date(res[res.length - 1][0]).getHours() <
+        new Date().getHours() - 1
+      ) {
         console.log(`${pair} on ${exchange} skipped!`);
         return;
+      }
+      if (
+        new Date(res[res.length - 1][0]).getHours() === new Date().getHours()
+      ) {
+        res.pop();
       }
       let close = res.map(c => c[4]);
       let guppy = utils.guppy(close).slice(-2)[0];

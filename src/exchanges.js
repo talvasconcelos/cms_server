@@ -51,11 +51,11 @@ const getCandles = async exchange => {
     let sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
     let since = Date.now() - 360000000; //100 hours
     let data = {};
-    let i = 0;
+    // let i = 0;
     if (exchange.has.fetchOHLCV) {
       await loadMarkets(exchange);
       for (let symbol in exchange.markets) {
-        if (i > 10) break;
+        // if (i > 10) break;
         let _ = exchange.markets[symbol];
         if (_.quote !== "BTC" || !_.active) continue;
         await sleep(exchange.rateLimit); // milliseconds
@@ -64,7 +64,7 @@ const getCandles = async exchange => {
           id: _.id,
           ohlcv
         };
-        i++;
+        // i++;
         // console.log(symbol, "done");
       }
     }

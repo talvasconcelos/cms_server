@@ -118,7 +118,7 @@ class Predictor {
       path,
       signature
     });
-    return;
+    return opts;
   }
 }
 

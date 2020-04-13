@@ -3,12 +3,13 @@ const app = polka();
 
 const Predictor = require("./predictor");
 const Scanner = require("./scanner");
-// const Hopper = require('./cryptohopper')
 
 const scanner = new Scanner();
 const pred = new Predictor();
 
 const { PORT = 3000 } = process.env;
+
+let PAIR_CACHE, AI_PAIR_CACHE;
 
 app.get("/", (req, res) => {
   res.end("Hello");
@@ -30,9 +31,11 @@ scanner.on("aiPairs", async aipairs => {
     timestamp: new Date().getTime(),
     data: preds
   };
+  AI_PAIR_CACHE = aiMsg;
   WS.broadcastWS(aiMsg);
 });
 
 scanner.on("guppy", pairs => {
+  PAIR_CACHE = pairs;
   console.log("guppyTA", pairs);
 });

@@ -5,9 +5,9 @@ const ids = [
   // "bittrex",
   "huobipro",
   "kraken",
-  "kucoin",
+  "kucoin"
   // "poloniex",
-  "hitbtc2"
+  // "hitbtc2"
 ];
 
 const allExchanges = async () => {

@@ -1,4 +1,5 @@
-require("heroku-self-ping")(process.env.APP_URL);
+const hsp = require("heroku-self-ping");
+hsp(process.env.APP_URL);
 
 const polka = require("polka");
 const app = polka();

@@ -50,11 +50,10 @@ class Predictor {
     try {
       const AE = tf.tensor3d([opts.candles[0]]);
       const X = tf.tensor3d([opts.candles[1]]);
-      if (AE.shape !== [1, 5, 8] || X.shape !== [1, 12, 8]) {
+      if (AE.shape !== [1, 12, 5] || X.shape !== [1, 12, 8]) {
         console.log("Wrong tensor shape.");
         return;
       }
-
       const AEX = await this.encoder.predict(AE);
       const AEXX = tf.concat([AEX, X], 2);
       const P = await this.model.predict(AEXX).dataSync()[0];

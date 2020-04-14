@@ -91,7 +91,7 @@ class Scanner extends EventEmitter {
       if (guppyTA.length > 0) {
         this.emit("guppy", guppyTA.map(c => delete c.candles));
       }
-      if (this.hour) {
+      if (/*this.hour*/ true) {
         this.emit("aiPairs", this.allData);
       }
       console.log(

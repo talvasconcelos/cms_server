@@ -1,5 +1,4 @@
-const H = require("heroku-self-ping");
-H.hsp(process.env.APP_URL);
+require("heroku-self-ping").default("https://market-scanner.herokuapp.com/");
 
 const polka = require("polka");
 const app = polka();

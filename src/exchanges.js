@@ -4,7 +4,7 @@ const ids = [
   "binance",
   // "bittrex",
   "huobipro",
-  "kraken",
+  // "kraken",
   "kucoin",
   // "poloniex",
   "hitbtc2"

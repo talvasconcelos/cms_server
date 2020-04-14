@@ -1,4 +1,3 @@
-"use strict";
 require("heroku-self-ping")(process.env.APP_URL);
 
 const polka = require("polka");

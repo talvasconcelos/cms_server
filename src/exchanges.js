@@ -5,15 +5,15 @@ const ids = [
   // "bittrex",
   "huobipro",
   "kraken",
-  "kucoin"
+  "kucoin",
   // "poloniex",
-  // "hitbtc2"
+  "hitbtc2"
 ];
 
 const allExchanges = async () => {
   const exchanges = [];
   await Promise.all(
-    ids.map(async id => {
+    ids.map(id => {
       // // instantiate the exchange
       let exchange = new ccxt[id]();
       exchanges.push(exchange);
@@ -38,15 +38,32 @@ const loadMarkets = async exchange => {
 };
 
 const getAllTickers = async exchange => {
+  let vol = 10;
+  if (exchange.id === "binance") {
+    vol = 75;
+  } else if (exchange.id === "huobipro") {
+    vol = 30;
+  }
   if (exchange.has["fetchTickers"]) {
     await loadMarkets(exchange);
-    const allTickers = await exchange.fetchTickers();
-    return allTickers;
+    const tickers = await exchange.fetchTickers();
+    return Object.values(tickers)
+      .filter(s => s.symbol.split("/")[1] === "BTC")
+      .filter(
+        s =>
+          s.quoteVolume > vol &&
+          (s.average > 0.00000199 || s.close > 0.00000199)
+      )
+      .map(s => ({
+        exchange: exchange.id,
+        symbol: s.symbol,
+        average: s.average || s.close,
+        volume: s.quoteVolume
+      }));
   }
-  return false;
 };
 
-const getCandles = async exchange => {
+const getCandles = async (exchange, tickers) => {
   try {
     let sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
     let since = Date.now() - 360000000; //100 hours
@@ -57,7 +74,7 @@ const getCandles = async exchange => {
       for (let symbol in exchange.markets) {
         // if (i > 10) break;
         let _ = exchange.markets[symbol];
-        if (_.quote !== "BTC" || !_.active) continue;
+        if (!tickers.includes(_.symbol) || !_.active) continue;
         await sleep(exchange.rateLimit); // milliseconds
         let ohlcv = await exchange.fetchOHLCV(symbol, "1h", since); // one hour
         data[`${symbol}`] = {
@@ -89,8 +106,11 @@ const getCandles = async exchange => {
 };
 
 // async function test() {
-//   const ex = await allExchanges();
-//   const candles = await getCandles(ex["kucoin"]);
+//   allExchanges()
+//     .then(res => {
+//       getAllTickers(res)
+//     })
+//   const candles = await getAllTickers(await ex);
 //   fs.writeFile("data.json", JSON.stringify(candles), err => {
 //     console.log("fs done");
 //   });

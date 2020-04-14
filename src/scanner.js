@@ -2,6 +2,7 @@ const EventEmitter = require("events");
 const continuous = require("continuous");
 const E = require("./exchanges");
 const utils = require("./utils");
+const fs = require("fs");
 
 class Scanner extends EventEmitter {
   constructor(options) {
@@ -11,12 +12,23 @@ class Scanner extends EventEmitter {
     this._timer = null;
     this._exchanges = null;
     this.allData = null;
+    this.allTickers = null;
 
     this.initScanner();
   }
 
   async initScanner() {
-    this._exchanges = await E.allExchanges();
+    await E.allExchanges().then(ex => {
+      return (this._exchanges = ex);
+    });
+    await this.filterByVolume();
+    //   .then(() => {
+    //   fs.writeFile("data.json", JSON.stringify(this.allTickers, null, 2), err =>
+    //     console.log("Done")
+    //   );
+    //   return;
+    // });
+    console.log("Pairs for analysis: ", this.allTickers.length);
     // console.log(this._exchanges[0].id);
   }
 
@@ -41,6 +53,9 @@ class Scanner extends EventEmitter {
         this.emit("scanStart");
         return resolve(true);
       });
+      setInterval(() => {
+        this.filterByVolume();
+      }, 3600000);
       // resolve(timer.start());
       let serverTime = Date.now();
       let milli = utils.delayedStart(15, serverTime);
@@ -60,9 +75,15 @@ class Scanner extends EventEmitter {
     console.log("New scan:", hour);
     await this._exchanges.reduce(async (prev, next) => {
       await prev;
-      const candles = await E.getCandles(next);
+      const tickersByExchange = this.allTickers
+        .filter(f => f.exchange === next.id)
+        .map(c => c.symbol);
+      const candles = await E.getCandles(next, tickersByExchange);
       await this.createPredictionData(Object.values(candles), next.id);
     }, Promise.resolve());
+    // fs.writeFile("candles.json", JSON.stringify(this.allData, null, 2), err =>
+    //   console.log("Done")
+    // );
     const guppyTA = await this.advise();
     if (guppyTA.length > 0) {
       this.emit("guppy", guppyTA);
@@ -116,7 +137,15 @@ class Scanner extends EventEmitter {
     }, Promise.resolve());
   }
 
-  async filterByVolume() {}
+  async filterByVolume() {
+    this.allTickers = [];
+    await this._exchanges.reduce(async (prev, next) => {
+      await prev;
+      const tickers = await E.getAllTickers(next);
+      this.allTickers.push(...tickers);
+    }, Promise.resolve());
+    // console.log(this.allTickers);
+  }
 }
 
 module.exports = Scanner;

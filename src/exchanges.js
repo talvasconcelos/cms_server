@@ -49,8 +49,6 @@ const getAllTickers = async exchange => {
       vol = 75;
     } else if (exchange.id === "huobipro") {
       vol = 50;
-    } else if (exchange.id === "bittrex") {
-      vol = 50;
     }
     if (exchange.has["fetchTickers"]) {
       await loadMarkets(exchange);

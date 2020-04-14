@@ -86,11 +86,11 @@ class Scanner extends EventEmitter {
       // fs.writeFile("candles.json", JSON.stringify(this.allData, null, 2), err =>
       //   console.log("Done")
       // );
-      // this.emit("guppy", this.allData);
-      const guppyTA = await this.advise();
-      if (guppyTA.length > 0) {
-        this.emit("guppy", guppyTA.map(c => delete c.candles));
-      }
+      this.emit("guppy", this.allData.map(c => delete c.candles));
+      // const guppyTA = await this.advise();
+      // if (guppyTA.length > 0) {
+      //   this.emit("guppy", guppyTA.map(c => delete c.candles));
+      // }
       if (this.hour) {
         this.emit("aiPairs", this.allData);
       }

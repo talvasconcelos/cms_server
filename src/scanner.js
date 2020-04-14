@@ -67,34 +67,40 @@ class Scanner extends EventEmitter {
   }
 
   async scan() {
-    const start = Date.now();
-    this.allData = [];
-    let hour = new Date();
-    hour.getMinutes() < 10 ? (this.hour = true) : (this.hour = false);
-    console.log("New scan:", hour);
-    await this._exchanges.reduce(async (prev, next) => {
-      await prev;
-      const tickersByExchange = this.allTickers
-        .filter(f => f.exchange === next.id)
-        .map(c => c.symbol);
-      const candles = await E.getCandles(next, tickersByExchange);
-      await this.createPredictionData(Object.values(candles), next.id);
-    }, Promise.resolve());
-    // fs.writeFile("candles.json", JSON.stringify(this.allData, null, 2), err =>
-    //   console.log("Done")
-    // );
-    this.emit("guppy", guppyTA);
-    // const guppyTA = await this.advise();
-    // if (guppyTA.length > 0) {
-    //   this.emit("guppy", guppyTA);
-    // }
-    if (this.hour) {
-      this.emit("aiPairs", this.allData);
+    try {
+      const start = Date.now();
+      this.allData = [];
+      let hour = new Date();
+      hour.getMinutes() < 10 ? (this.hour = true) : (this.hour = false);
+      console.log("New scan:", hour);
+      await this._exchanges.reduce(async (prev, next) => {
+        await prev;
+        const tickersByExchange = this.allTickers
+          .filter(f => f.exchange === next.id)
+          .map(c => c.symbol);
+        const candles = await E.getCandles(next, tickersByExchange);
+        if (candles && Object.keys(candles).length) {
+          await this.createPredictionData(Object.values(candles), next.id);
+        }
+      }, Promise.resolve());
+      // fs.writeFile("candles.json", JSON.stringify(this.allData, null, 2), err =>
+      //   console.log("Done")
+      // );
+      this.emit("guppy", this.allData);
+      // const guppyTA = await this.advise();
+      // if (guppyTA.length > 0) {
+      //   this.emit("guppy", guppyTA);
+      // }
+      if (this.hour) {
+        this.emit("aiPairs", this.allData);
+      }
+      console.log(
+        `Scan ended! Elapsed: ${Math.floor((Date.now() - start) / 1000)} secs!`
+      );
+      return;
+    } catch (e) {
+      console.error(e);
     }
-    console.log(
-      `Scan ended! Elapsed: ${Math.floor((Date.now() - start) / 1000)} secs!`
-    );
-    return;
   }
 
   async advise() {

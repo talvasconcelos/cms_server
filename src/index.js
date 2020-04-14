@@ -24,14 +24,23 @@ app.listen(PORT, err => {
 
 const WS = require("./websocket")({ server: app.server });
 
+WS.wss.on("connection", ws => {
+  if (AI_PAIR_CACHE) {
+    ws.send(JSON.stringify(AI_PAIR_CACHE));
+  }
+  if (PAIR_CACHE) {
+    ws.send(JSON.stringify(PAIR_CACHE));
+  }
+});
+
 scanner.startScanner({ time: 900000 });
 
 scanner.on("aiPairs", async aipairs => {
-  const preds = await pred.batchPredict(aipairs);
+  await pred.batchPredict(aipairs);
   const aiMsg = {
     ai: true,
     timestamp: new Date().getTime(),
-    data: preds
+    data: pred.preds
   };
   AI_PAIR_CACHE = aiMsg;
   WS.broadcastWS(aiMsg);

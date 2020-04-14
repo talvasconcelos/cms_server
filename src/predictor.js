@@ -109,10 +109,11 @@ class Predictor {
   processSignal(opts) {
     const market = opts.pair;
     const type = opts.side;
-    //const path = '/testsignal.php?api_key=' + this.api_key + '&signal_id=' + this.signal_id + '&exchange=' + this.exchange + '&market=' + market + '&type=' + type
     const path = `/signal.php?api_key=${this.api_key}&signal_id=${
       this.signal_id
-    }&exchange=${opts.exchange}&market=${market}&type=${type}`;
+    }&exchange=${
+      opts.exchange === "hitbtc2" ? "hitbtc" : opts.exchange
+    }&market=${market}&type=${type}`;
     const signature = this.hashSignature(path);
     this.sendSignal({
       path,

@@ -2,9 +2,9 @@ const ccxt = require("ccxt");
 
 const ids = [
   "binance",
-  // "bittrex",
+  "bittrex",
   "huobipro",
-  // "kraken",
+  "kraken",
   "kucoin",
   // "poloniex",
   "hitbtc2"
@@ -15,7 +15,12 @@ const allExchanges = async () => {
   await Promise.all(
     ids.map(id => {
       // // instantiate the exchange
-      let exchange = new ccxt[id]();
+      let exchange = new ccxt[id]({
+        enableRateLimit: true,
+        options: {
+          fetchMinOrderAmounts: false
+        }
+      });
       exchanges.push(exchange);
 
       // load markets
@@ -38,28 +43,48 @@ const loadMarkets = async exchange => {
 };
 
 const getAllTickers = async exchange => {
-  let vol = 10;
-  if (exchange.id === "binance") {
-    vol = 75;
-  } else if (exchange.id === "huobipro") {
-    vol = 30;
-  }
-  if (exchange.has["fetchTickers"]) {
-    await loadMarkets(exchange);
-    const tickers = await exchange.fetchTickers();
-    return Object.values(tickers)
-      .filter(s => s.symbol.split("/")[1] === "BTC")
-      .filter(
-        s =>
-          s.quoteVolume > vol &&
-          (s.average > 0.00000199 || s.close > 0.00000199)
-      )
-      .map(s => ({
-        exchange: exchange.id,
-        symbol: s.symbol,
-        average: s.average || s.close,
-        volume: s.quoteVolume
-      }));
+  try {
+    let vol = 10;
+    if (exchange.id === "binance") {
+      vol = 75;
+    } else if (exchange.id === "huobipro") {
+      vol = 50;
+    } else if (exchange.id === "bittrex") {
+      vol = 50;
+    }
+    if (exchange.has["fetchTickers"]) {
+      await loadMarkets(exchange);
+      const tickers = await exchange.fetchTickers();
+      return Object.values(tickers)
+        .filter(s => s.symbol.split("/")[1] === "BTC")
+        .filter(
+          s =>
+            s.quoteVolume > vol &&
+            (s.average > 0.00000199 || s.close > 0.00000199)
+        )
+        .map(s => ({
+          exchange: exchange.id,
+          symbol: s.symbol,
+          average: s.average || s.close,
+          volume: s.quoteVolume
+        }));
+    }
+  } catch (e) {
+    if (e instanceof ccxt.DDoSProtection) {
+      console.error(exchange.id, "[DDoS Protection]");
+    } else if (e instanceof ccxt.RequestTimeout) {
+      console.error(exchange.id, "[Request Timeout]");
+    } else if (e instanceof ccxt.AuthenticationError) {
+      console.error(exchange.id, "[Authentication Error]");
+    } else if (e instanceof ccxt.ExchangeNotAvailable) {
+      console.error(exchange.id, "[Exchange Not Available]");
+    } else if (e instanceof ccxt.ExchangeError) {
+      console.error(exchange.id, "[Exchange Error]");
+    } else if (e instanceof ccxt.NetworkError) {
+      console.error(exchange.id, "[Network Error]");
+    } else {
+      throw e;
+    }
   }
 };
 

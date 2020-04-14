@@ -2,7 +2,6 @@ const EventEmitter = require("events");
 const continuous = require("continuous");
 const E = require("./exchanges");
 const utils = require("./utils");
-const fs = require("fs");
 
 class Scanner extends EventEmitter {
   constructor(options) {
@@ -84,10 +83,11 @@ class Scanner extends EventEmitter {
     // fs.writeFile("candles.json", JSON.stringify(this.allData, null, 2), err =>
     //   console.log("Done")
     // );
-    const guppyTA = await this.advise();
-    if (guppyTA.length > 0) {
-      this.emit("guppy", guppyTA);
-    }
+    this.emit("guppy", guppyTA);
+    // const guppyTA = await this.advise();
+    // if (guppyTA.length > 0) {
+    //   this.emit("guppy", guppyTA);
+    // }
     if (this.hour) {
       this.emit("aiPairs", this.allData);
     }
@@ -138,13 +138,19 @@ class Scanner extends EventEmitter {
   }
 
   async filterByVolume() {
-    this.allTickers = [];
-    await this._exchanges.reduce(async (prev, next) => {
-      await prev;
-      const tickers = await E.getAllTickers(next);
-      this.allTickers.push(...tickers);
-    }, Promise.resolve());
-    // console.log(this.allTickers);
+    try {
+      this.allTickers = [];
+      await this._exchanges.reduce(async (prev, next) => {
+        await prev;
+        const tickers = await E.getAllTickers(next);
+        if (tickers && tickers.length) {
+          this.allTickers.push(...tickers);
+        }
+        return;
+      }, Promise.resolve());
+    } catch (e) {
+      console.error(e);
+    }
   }
 }
 

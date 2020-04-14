@@ -36,6 +36,7 @@ WS.wss.on("connection", ws => {
 scanner.startScanner({ time: 900000 });
 
 scanner.on("aiPairs", async aipairs => {
+  console.log("Predicting!");
   await pred.batchPredict(aipairs);
   const aiMsg = {
     ai: true,
@@ -47,6 +48,6 @@ scanner.on("aiPairs", async aipairs => {
 });
 
 scanner.on("guppy", pairs => {
+  WS.broadcastWS(pairs);
   PAIR_CACHE = pairs;
-  console.log("guppyTA", pairs);
 });

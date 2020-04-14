@@ -2,7 +2,7 @@ const ccxt = require("ccxt");
 
 const ids = [
   "binance",
-  "bittrex",
+  // "bittrex",
   "huobipro",
   "kraken",
   "kucoin",

@@ -86,11 +86,11 @@ class Scanner extends EventEmitter {
       // fs.writeFile("candles.json", JSON.stringify(this.allData, null, 2), err =>
       //   console.log("Done")
       // );
-      this.emit("guppy", this.allData);
-      // const guppyTA = await this.advise();
-      // if (guppyTA.length > 0) {
-      //   this.emit("guppy", guppyTA);
-      // }
+      // this.emit("guppy", this.allData);
+      const guppyTA = await this.advise();
+      if (guppyTA.length > 0) {
+        this.emit("guppy", guppyTA.map(c => delete c.candles));
+      }
       if (this.hour) {
         this.emit("aiPairs", this.allData);
       }
@@ -105,7 +105,7 @@ class Scanner extends EventEmitter {
 
   async advise() {
     return this.allData.filter(
-      c => c.guppy[0][0] === 0 && c.guppy[0][1] === 0 && c.guppy[1][0] === 1
+      c => c.guppy[0] === [0, 0] && c.guppy[1] === [1, 0]
     );
   }
 

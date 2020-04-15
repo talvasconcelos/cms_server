@@ -112,8 +112,7 @@ const getCandles = async (exchange, tickers) => {
           market:
             exchange.id === "binance" ||
             exchange.id === "bittrex" ||
-            exchange.id === "kraken" ||
-            exchange.id === "hitbtc2"
+            exchange.id === "kraken"
               ? _.id
               : symbol,
           ohlcv

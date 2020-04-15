@@ -33,7 +33,7 @@ class Predictor {
 
   async batchPredict(pairs) {
     this.preds = [];
-    return pairs.reduce(async (prevPair, nextPair) => {
+    return await pairs.reduce(async (prevPair, nextPair) => {
       await prevPair;
       return this.getPrediction(nextPair).catch(err => console.error(err));
     }, Promise.resolve());
@@ -41,48 +41,44 @@ class Predictor {
 
   async getPrediction(opts) {
     if (!this.model || !this.encoder) {
+      console.log("No AI model!");
       return;
     }
     if (!opts.candles) {
+      console.log("No candles!");
       return;
     }
-    // console.log(opts.candles)
-    try {
-      const AE = tf.tensor3d([opts.candles[0]]);
-      const X = tf.tensor3d([opts.candles[1]]);
-      // if (AE.shape !== [1, 12, 5] || X.shape !== [1, 12, 8]) {
-      //   console.log("Wrong tensor shape.");
-      //   return;
-      // }
-      const AEX = await this.encoder.predict(AE);
-      const AEXX = tf.concat([AEX, X], 2);
-      const P = await this.model.predict(AEXX).dataSync()[0];
-      AE.dispose();
-      X.dispose();
-      AEX.dispose();
-      AEXX.dispose();
-      if (P < 0.9 || isNaN(P)) {
-        console.log(
-          `Skipped ${opts.exchange} / ${opts.pair}: ${side} | Prob: ${P}`
-        );
-        return;
-      }
-      const side = "buy";
-      console.log(`${opts.exchange} / ${opts.pair}: ${side} | Prob: ${P}`);
-      delete opts.candles;
-      this.preds.push({
-        ...opts,
-        prob: P,
-        side: side
-      });
-      return this.processSignal({
-        pair: opts.pair,
-        side: side,
-        exchange: opts.exchange
-      });
-    } catch (e) {
-      throw e;
+    const AE = tf.tensor3d([opts.candles[0]]);
+    const X = tf.tensor3d([opts.candles[1]]);
+    // if (AE.shape !== [1, 12, 5] || X.shape !== [1, 12, 8]) {
+    //   console.log("Wrong tensor shape.");
+    //   return;
+    // }
+    const AEX = await this.encoder.predict(AE);
+    const AEXX = tf.concat([AEX, X], 2);
+    const P = await this.model.predict(AEXX).dataSync()[0];
+    AE.dispose();
+    X.dispose();
+    AEX.dispose();
+    AEXX.dispose();
+    if (P < 0.9 || isNaN(P)) {
+      // console.log(`Skipped ${opts.exchange} / ${opts.pair} | Prob: ${P}`);
+      return;
     }
+    const side = "buy";
+    console.log(`${opts.exchange} / ${opts.pair}: ${side} | Prob: ${P}`);
+    delete opts.candles;
+    this.preds.push({
+      exchange: opts.exchange,
+      pair: opts.pair,
+      prob: P,
+      side: side
+    });
+    return this.processSignal({
+      exchange: opts.exchange,
+      pair: opts.pair,
+      side: side
+    });
   }
 
   sendSignal(opts) {

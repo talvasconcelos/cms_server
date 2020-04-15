@@ -13,7 +13,7 @@ const pred = new Predictor();
 
 const { PORT = 3000 } = process.env;
 
-let PAIR_CACHE, AI_PAIR_CACHE;
+let PAIR_CACHE = null;
 
 app.get("/", (req, res) => {
   res.end("Hello");
@@ -27,29 +27,36 @@ app.listen(PORT, err => {
 const WS = require("./websocket")({ server: app.server });
 
 WS.wss.on("connection", ws => {
-  if (AI_PAIR_CACHE) {
-    ws.send(JSON.stringify(AI_PAIR_CACHE));
-  }
   if (PAIR_CACHE) {
     ws.send(JSON.stringify(PAIR_CACHE));
   }
 });
 
-scanner.startScanner({ time: 900000 });
+// scanner.startScanner({ test: true, time: 60000 });
+scanner.startScanner();
 
 scanner.on("aiPairs", async aipairs => {
-  console.log("Predicting!");
-  await pred.batchPredict(aipairs);
   const aiMsg = {
-    ai: true,
-    timestamp: new Date().getTime(),
-    data: pred.preds
+    timestamp: new Date().getTime()
   };
-  AI_PAIR_CACHE = aiMsg;
+  if (scanner.hour) {
+    await pred.batchPredict(aipairs);
+    // aiMsg.ai = true;
+    aiMsg.aidata = pred.preds;
+  }
+  const data = aipairs
+    .map(c => {
+      delete c.candles;
+      return c;
+    })
+    .filter(
+      c =>
+        JSON.stringify(c.guppy[0]) === JSON.stringify([0, 0]) &&
+        JSON.stringify(c.guppy[1]) === JSON.stringify([1, 0])
+    );
+  aiMsg.ai = scanner.hour;
+  aiMsg.data = data;
+  PAIR_CACHE = aiMsg;
   WS.broadcastWS(aiMsg);
-});
-
-scanner.on("guppy", pairs => {
-  WS.broadcastWS(pairs);
-  PAIR_CACHE = pairs;
+  console.log("MSG", aiMsg);
 });

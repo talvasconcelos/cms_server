@@ -62,7 +62,7 @@ const utils = {
         mma[5][i] < mma[6][i] &&
         mma[6][i] < mma[7][i] &&
         mma[7][i] < mma[8][i];
-      const gFast = fastL && slowL ? 1 : fastS && slowS ? -1 : 0;
+      const gFast = fastL ? 1 : fastS && slowS ? -1 : 0;
       const gSlow = slowL ? 1 : slowS ? -1 : 0;
       guppy.push([gFast, gSlow]);
     }

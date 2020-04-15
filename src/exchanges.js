@@ -2,7 +2,7 @@ const ccxt = require("ccxt");
 
 const ids = [
   "binance",
-  // "bittrex",
+  "bittrex",
   "huobipro",
   "kraken",
   "kucoin",
@@ -21,6 +21,9 @@ const allExchanges = async () => {
           fetchMinOrderAmounts: false
         }
       });
+      if (exchange.id === "bittrex") {
+        exchange.hostname = "global.bittrex.com";
+      }
       exchanges.push(exchange);
 
       // load markets
@@ -44,11 +47,15 @@ const loadMarkets = async exchange => {
 
 const getAllTickers = async exchange => {
   try {
-    let vol = 10;
+    let vol = 7;
     if (exchange.id === "binance") {
+      vol = 100;
+    }
+    if (exchange.id === "huobipro") {
       vol = 75;
-    } else if (exchange.id === "huobipro") {
-      vol = 50;
+    }
+    if (exchange.id === "bittrex") {
+      vol = 15;
     }
     if (exchange.has["fetchTickers"]) {
       await loadMarkets(exchange);
@@ -58,7 +65,7 @@ const getAllTickers = async exchange => {
         .filter(
           s =>
             s.quoteVolume > vol &&
-            (s.average > 0.00000199 || s.close > 0.00000199)
+            (s.average > 0.00000099 || s.close > 0.00000099)
         )
         .map(s => ({
           exchange: exchange.id,
@@ -95,17 +102,24 @@ const getCandles = async (exchange, tickers) => {
     if (exchange.has.fetchOHLCV) {
       await loadMarkets(exchange);
       for (let symbol in exchange.markets) {
-        // if (i > 10) break;
+        // if (i > 3) break;
         let _ = exchange.markets[symbol];
         if (!tickers.includes(_.symbol) || !_.active) continue;
         await sleep(exchange.rateLimit); // milliseconds
         let ohlcv = await exchange.fetchOHLCV(symbol, "1h", since); // one hour
         data[`${symbol}`] = {
           id: _.id,
+          market:
+            exchange === "binance" ||
+            exchange === "bittrex" ||
+            exchange === "kraken" ||
+            exchange === "hitbtc2"
+              ? _.id
+              : symbol,
           ohlcv
         };
         // i++;
-        // console.log(symbol, "done");
+        // console.log(exchange.id, _.id, "done");
       }
     }
     return data;
@@ -127,19 +141,6 @@ const getCandles = async (exchange, tickers) => {
     }
   }
 };
-
-// async function test() {
-//   allExchanges()
-//     .then(res => {
-//       getAllTickers(res)
-//     })
-//   const candles = await getAllTickers(await ex);
-//   fs.writeFile("data.json", JSON.stringify(candles), err => {
-//     console.log("fs done");
-//   });
-// }
-
-// test();
 
 module.exports = {
   allExchanges,

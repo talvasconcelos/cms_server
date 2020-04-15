@@ -76,7 +76,7 @@ class Predictor {
     });
     return this.processSignal({
       exchange: opts.exchange,
-      pair: opts.pair,
+      pair: opts.market,
       side: side
     });
   }

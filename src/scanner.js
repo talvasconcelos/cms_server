@@ -136,6 +136,7 @@ class Scanner extends EventEmitter {
         const out = {
           exchange: exchange,
           pair,
+          market: nextPair.market,
           candles,
           close: close.slice(-1),
           guppy,

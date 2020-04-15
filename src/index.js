@@ -32,7 +32,7 @@ WS.wss.on("connection", ws => {
   }
 });
 
-// scanner.startScanner({ test: true, time: 60000 });
+// scanner.startScanner({ test: true, time: 20000 });
 scanner.startScanner();
 
 scanner.on("aiPairs", async aipairs => {

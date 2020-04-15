@@ -1,4 +1,6 @@
-require("heroku-self-ping").default("https://market-scanner.herokuapp.com/");
+require("heroku-self-ping").default("https://market-scanner.herokuapp.com/", {
+  interval: 25 * 60 * 1000
+});
 
 const polka = require("polka");
 const app = polka();

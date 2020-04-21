@@ -6,6 +6,7 @@ const ids = [
   "huobipro",
   "kraken",
   "kucoin",
+  "bitfinex",
   // "poloniex",
   "hitbtc2"
 ];
@@ -47,7 +48,7 @@ const loadMarkets = async exchange => {
 
 const getAllTickers = async exchange => {
   try {
-    let vol = 7;
+    let vol = 10;
     if (exchange.id === "binance") {
       vol = 100;
     }
@@ -55,7 +56,7 @@ const getAllTickers = async exchange => {
       vol = 75;
     }
     if (exchange.id === "bittrex") {
-      vol = 15;
+      vol = 20;
     }
     if (exchange.has["fetchTickers"]) {
       await loadMarkets(exchange);

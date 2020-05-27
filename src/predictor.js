@@ -108,23 +108,19 @@ class Predictor {
 
   async zignalySend(opts) {
     if (opts.exchange !== 'binance' && opts.exchange !== 'kucoin') return
-    const options = {
-      method: 'POST',
-      body: `key=${process.env.ZIG_KEY}&
-        pair=${opts.pair}&
-        exchange=${opts.exchange}&
-        MDprobPerct=${opts.prob * 100}&
-        trailingStopTriggerPercentage=2.2&
-        trailingStopDistancePercentage=0.4`,
-    }
     try {
-      const req = await fetch('https://zignaly.com/api/signals.php', options)
-      const res = await req.text()
-      console.log(res)
-    } catch (e) {
-      console.error(e)
-    }
-    return
+    const req = await fetch(
+      `https://zignaly.com/api/signals.php?key=${process.env.ZIG_KEY}&pair=${
+        opts.pair
+      }&exchange=${opts.exchange}&MDprobPerct=${opts.prob *
+        100}&trailingStopTriggerPercentage=2.2&trailingStopDistancePercentage=0.4`
+    );
+    const res = await req;
+    console.log(res.status, res.statusText);
+  } catch (e) {
+    console.error(e);
+  }
+  return;
   }
 
   hashSignature(path) {

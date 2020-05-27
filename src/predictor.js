@@ -120,7 +120,7 @@ class Predictor {
       }),
     }
     try {
-      const req = fetch('https://zignaly.com/api/signals.php', options)
+      const req = await fetch('https://zignaly.com/api/signals.php', options)
       const res = await req.json()
       console.log(res)
     } catch (e) {

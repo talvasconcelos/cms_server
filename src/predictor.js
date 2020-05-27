@@ -110,18 +110,16 @@ class Predictor {
     if (opts.exchange !== 'binance' && opts.exchange !== 'kucoin') return
     const options = {
       method: 'POST',
-      body: JSON.stringify({
-        key: process.env.ZIG_KEY,
-        pair: opts.pair,
-        exchange: opts.exchange,
-        MDprobPerct: opts.prob * 100,
-        trailingStopTriggerPercentage: 2.2,
-        trailingStopDistancePercentage: 0.4,
-      }),
+      body: `key=${process.env.ZIG_KEY}&
+        pair=${opts.pair}&
+        exchange=${opts.exchange}&
+        MDprobPerct=${opts.prob * 100}&
+        trailingStopTriggerPercentage=2.2&
+        trailingStopDistancePercentage=0.4`,
     }
     try {
       const req = await fetch('https://zignaly.com/api/signals.php', options)
-      const res = await req.json()
+      const res = await req.text()
       console.log(res)
     } catch (e) {
       console.error(e)

@@ -87,7 +87,7 @@ class Predictor {
   }
 
   async batchZignaly(data) {
-    return await data.reduce((prevP, nextP) => {
+    return await data.reduce(async (prevP, nextP) => {
       await prevP
       return this.zignalySend({
         exchange: nextP.exchange,
@@ -120,18 +120,19 @@ class Predictor {
   async zignalySend(opts) {
     if (opts.exchange !== 'binance' && opts.exchange !== 'kucoin') return
     try {
-    const req = await fetch(
-      `https://zignaly.com/api/signals.php?key=${process.env.ZIG_KEY}&pair=${
-        opts.pair
-      }&exchange=${opts.exchange}&MDprobPerct=${opts.prob *
-        100}&trailingStopTriggerPercentage=2.2&trailingStopDistancePercentage=0.4`
-    );
-    const res = await req;
-    console.log(res.status, res.statusText);
-  } catch (e) {
-    console.error(e);
-  }
-  return;
+      const req = await fetch(
+        `https://zignaly.com/api/signals.php?key=${process.env.ZIG_KEY}&pair=${
+          opts.pair
+        }&exchange=${opts.exchange}&MDprobPerct=${
+          opts.prob * 100
+        }&trailingStopTriggerPercentage=2.2&trailingStopDistancePercentage=0.4`
+      )
+      const res = await req
+      console.log(res.status, res.statusText)
+    } catch (e) {
+      console.error(e)
+    }
+    return
   }
 
   hashSignature(path) {

@@ -74,16 +74,27 @@ class Predictor {
       prob: P,
       side: side,
     })
-    await this.zignalySend({
-      exchange: opts.exchange,
-      pair: opts.pair,
-      prob: P,
-    })
+    // await this.zignalySend({
+    //   exchange: opts.exchange,
+    //   pair: opts.pair,
+    //   prob: P,
+    // })
     return this.processSignal({
       exchange: opts.exchange,
       pair: opts.market,
       side: side,
     })
+  }
+
+  async batchZignaly(data) {
+    return await data.reduce((prevP, nextP) => {
+      await prevP
+      return this.zignalySend({
+        exchange: nextP.exchange,
+        pair: nextP.pair,
+        prob: nextP.prob,
+      }).catch(err => console.error(err))
+    }, Promise.resolve())
   }
 
   sendSignal(opts) {

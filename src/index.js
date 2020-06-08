@@ -1,62 +1,63 @@
-require("heroku-self-ping").default("https://market-scanner.herokuapp.com/", {
-  interval: 25 * 60 * 1000
-});
+require('heroku-self-ping').default('https://market-scanner.herokuapp.com/', {
+  interval: 25 * 60 * 1000,
+})
 
-const polka = require("polka");
-const app = polka();
+const polka = require('polka')
+const app = polka()
 
-const Predictor = require("./predictor");
-const Scanner = require("./scanner");
+const Predictor = require('./predictor')
+const Scanner = require('./scanner')
 
-const scanner = new Scanner();
-const pred = new Predictor();
+const scanner = new Scanner()
+const pred = new Predictor()
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3000 } = process.env
 
-let PAIR_CACHE = null;
+let PAIR_CACHE = null
 
-app.get("/", (req, res) => {
-  res.end("Hello");
-});
+app.get('/', (req, res) => {
+  res.end('Hello')
+})
 
 app.listen(PORT, err => {
-  if (err) throw err;
-  console.log(`Listening on ${PORT}`);
-});
+  if (err) throw err
+  console.log(`Listening on ${PORT}`)
+})
 
-const WS = require("./websocket")({ server: app.server });
+const WS = require('./websocket')({ server: app.server })
 
-WS.wss.on("connection", ws => {
+WS.wss.on('connection', ws => {
   if (PAIR_CACHE) {
-    ws.send(JSON.stringify(PAIR_CACHE));
+    ws.send(JSON.stringify(PAIR_CACHE))
   }
-});
+})
 
 // scanner.startScanner({ test: true, time: 20000 });
-scanner.startScanner();
+scanner.startScanner()
 
-scanner.on("aiPairs", async aipairs => {
+scanner.on('aiPairs', async aipairs => {
   const aiMsg = {
-    timestamp: new Date().getTime()
-  };
+    timestamp: new Date().getTime(),
+  }
   if (scanner.hour) {
-    await pred.batchPredict(aipairs);
+    await pred.batchPredict(aipairs)
     // aiMsg.ai = true;
-    aiMsg.aidata = pred.preds;
+    aiMsg.aidata = pred.preds
+    await pred.batchZignaly(pred.preds.sort((a, b) => b.prob - a.prob))
   }
   const data = aipairs
     .map(c => {
-      delete c.candles;
-      return c;
+      delete c.candles
+      return c
     })
     .filter(
       c =>
         JSON.stringify(c.guppy[0]) === JSON.stringify([0, 0]) &&
         JSON.stringify(c.guppy[1]) === JSON.stringify([1, 0])
-    );
-  aiMsg.ai = scanner.hour;
-  aiMsg.data = data;
-  PAIR_CACHE = aiMsg;
-  WS.broadcastWS(aiMsg);
-  console.log("MSG", aiMsg);
-});
+    )
+  aiMsg.ai = scanner.hour
+  aiMsg.data = data
+  PAIR_CACHE = aiMsg
+  WS.broadcastWS(aiMsg)
+  console.log('MSG', aiMsg)
+})

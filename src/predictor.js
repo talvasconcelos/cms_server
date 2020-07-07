@@ -69,8 +69,7 @@ class Predictor {
     console.log(`${opts.exchange} / ${opts.pair}: ${side} | Prob: ${P}`)
     delete opts.candles
     this.preds.push({
-      exchange: opts.exchange,
-      pair: opts.pair,
+      ...opts,
       prob: P,
       side: side,
     })

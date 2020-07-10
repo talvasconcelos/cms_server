@@ -57,7 +57,14 @@ scanner.on('aiPairs', async aipairs => {
     )
   aiMsg.ai = scanner.hour
   aiMsg.data = data
-  PAIR_CACHE = aiMsg
+  if(scanner.hour){
+    PAIR_CACHE = aiMsg
+  } else {
+    PAIR_CACHE.data = aiMsg.data
+    PAIR_CACHE.timestamp = aiMsg.timestamp
+    PAIR_CACHE.ai = aiMsg.ai
+  }
+  
   WS.broadcastWS(aiMsg)
   console.log('MSG', aiMsg)
 })

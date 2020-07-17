@@ -149,7 +149,11 @@ class Predictor {
     const body = new FormData
     body.append("marketplace_item_id", this._3commas_id)
     body.append("pair", opts.symbol.replace('/', '_'))
-    body.append("exchange", opts.exchange)
+    body.append("exchange", opts.exchange === 'hitbtc2'
+      ? 'hitbtc'
+      : opts.exchange === 'huobipro'
+        ? 'huobi'
+        : opts.exchange)
     body.append("direction", "long")
     body.append("date_param", Date.now())
     const check_string = `#{params[:${body.get('pair')}]}#{params[:${body.get('exchange')}]}#{params[:${body.get('direction')}]}#{params[:${body.get('marketplace_item_id')}]}{params[:${body.get('date_param')}]}`

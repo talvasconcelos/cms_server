@@ -44,6 +44,7 @@ scanner.on('aiPairs', async aipairs => {
     // aiMsg.ai = true;
     aiMsg.aidata = pred.preds
     await pred.batchZignaly(pred.preds.sort((a, b) => b.prob - a.prob))
+    await pred.batch3Commas(pred.preds.sort((a, b) => b.prob - a.prob))
   }
   const data = aipairs
     .map(c => {
@@ -57,14 +58,14 @@ scanner.on('aiPairs', async aipairs => {
     )
   aiMsg.ai = scanner.hour
   aiMsg.data = data
-  if(scanner.hour){
+  if (scanner.hour) {
     PAIR_CACHE = aiMsg
   } else {
     PAIR_CACHE.data = aiMsg.data
     PAIR_CACHE.timestamp = aiMsg.timestamp
     PAIR_CACHE.ai = aiMsg.ai
   }
-  
+
   WS.broadcastWS(aiMsg)
   console.log('MSG', aiMsg)
 })

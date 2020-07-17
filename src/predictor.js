@@ -15,6 +15,8 @@ const model = tf.loadLayersModel(
 const API_KEY = process.env.HOPPER_KEY
 const API_SECRET = process.env.HOPPER_SECRET
 const SIGNALLER_ID = process.env.SIGNALLER_ID
+const COMMAS_SECRET = process.env.COMMAS_SECRET
+const COMMAS_ID = process.env.COMMAS_ID
 
 tf.setBackend('cpu')
 
@@ -26,6 +28,8 @@ class Predictor {
     this.api_key = API_KEY
     this.api_secret = API_SECRET
     this.signal_id = SIGNALLER_ID
+    this._3commas_key = COMMAS_SECRET
+    this._3commas_id = COMMAS_ID
     this.preds = []
     encoder.then(e => (this.encoder = e)).catch(err => console.error(err))
     model.then(m => (this.model = m)).catch(err => console.error(err))
@@ -96,6 +100,13 @@ class Predictor {
     }, Promise.resolve())
   }
 
+  async batch3Commas(data) {
+    return await data.reduce(async (prevP, nextP) => {
+      await prevP
+      return this._3commasSend(nextP).catch(err => console.error(err))
+    }, Promise.resolve())
+  }
+
   sendSignal(opts) {
     const headers = {
       'User-Agent': 'Cryptohopper Signaller/0.0.1',
@@ -121,9 +132,9 @@ class Predictor {
     try {
       const req = await fetch(
         `https://zignaly.com/api/signals.php?key=${process.env.ZIG_KEY}&pair=${
-          opts.pair
+        opts.pair
         }&exchange=${opts.exchange}&MDprobPerct=${
-          opts.prob * 100
+        opts.prob * 100
         }&trailingStopTriggerPercentage=2.2&trailingStopDistancePercentage=0.4`
       )
       const res = await req
@@ -134,9 +145,38 @@ class Predictor {
     return
   }
 
-  hashSignature(path) {
-    const hmac = crypto.createHmac('sha512', this.api_secret)
-    const signature = hmac.update(path)
+  async _3commasSend(opts) {
+    const body = new FormData
+    body.append("marketplace_item_id", this._3commas_id)
+    body.append("pair", opts.symbol.replace('/', '_'))
+    body.append("exchange", opts.exchange)
+    body.append("direction", "long")
+    body.append("date_param", Date.now())
+    const check_string = `#{params[:${body.get('pair')}]}#{params[:${body.get('exchange')}]}#{params[:${body.get('direction')}]}#{params[:${body.get('marketplace_item_id')}]}{params[:${body.get('date_param')}]}`
+    const sign = this.hashSignature(check_string, this._3commas_key)
+    body.append("sign", sign)
+
+    try {
+      const req = await fetch("https://3commas.io/signals/v1/publish_bot_signal", {
+        body,
+        headers: {
+          "Cache-Control": "no-cache",
+          "Content-Type": "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW"
+        },
+        method: "POST"
+      })
+      const res = await req
+      console.log(res)
+
+    } catch (e) {
+      console.error(e)
+    }
+    return
+  }
+
+  hashSignature(value, key) {
+    const hmac = crypto.createHmac('sha512', key)
+    const signature = hmac.update(value)
     return signature.digest('hex')
   }
 
@@ -145,14 +185,14 @@ class Predictor {
     const type = opts.side
     const path = `/signal.php?api_key=${this.api_key}&signal_id=${
       this.signal_id
-    }&exchange=${
+      }&exchange=${
       opts.exchange === 'hitbtc2'
         ? 'hitbtc'
         : opts.exchange === 'huobipro'
-        ? 'huobi'
-        : opts.exchange
-    }&market=${market}&type=${type}`
-    const signature = this.hashSignature(path)
+          ? 'huobi'
+          : opts.exchange
+      }&market=${market}&type=${type}`
+    const signature = this.hashSignature(path, this.api_secret)
     this.sendSignal({
       path,
       signature,

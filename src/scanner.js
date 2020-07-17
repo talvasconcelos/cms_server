@@ -135,6 +135,7 @@ class Scanner extends EventEmitter {
         let candles = utils.prepareData(res);
         const out = {
           exchange: exchange,
+          symbol,
           pair,
           market: nextPair.market,
           candles,

@@ -110,10 +110,11 @@ const getCandles = async (exchange, tickers) => {
         let ohlcv = await exchange.fetchOHLCV(symbol, "1h", since); // one hour
         data[`${symbol}`] = {
           id: _.id,
+          symbol,
           market:
             exchange.id === "binance" ||
-            exchange.id === "bittrex" ||
-            exchange.id === "kraken"
+              exchange.id === "bittrex" ||
+              exchange.id === "kraken"
               ? _.id
               : symbol,
           ohlcv

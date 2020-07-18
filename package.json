@@ -10,6 +10,7 @@
     "@tensorflow/tfjs": "1.7.2",
     "ccxt": "1.25.84",
     "continuous": "0.1.2",
+    "form-data": "^3.0.0",
     "heroku-self-ping": "2.0.1",
     "node-fetch": "2.6.0",
     "polka": "0.5.2",

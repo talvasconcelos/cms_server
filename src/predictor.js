@@ -2,6 +2,7 @@ global.fetch = require('node-fetch')
 
 const crypto = require('crypto')
 const request = require('request')
+const FormData = require('form-data')
 
 const tf = require('@tensorflow/tfjs')
 

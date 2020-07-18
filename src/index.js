@@ -61,7 +61,7 @@ scanner.on('aiPairs', async aipairs => {
   if (scanner.hour) {
     PAIR_CACHE = aiMsg
   } else {
-    PAIR_CACHE.data = aiMsg.data
+    PAIR_CACHE.data = aiMsg.data || []
     PAIR_CACHE.timestamp = aiMsg.timestamp
     PAIR_CACHE.ai = aiMsg.ai
   }

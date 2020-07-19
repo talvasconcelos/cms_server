@@ -147,17 +147,20 @@ class Predictor {
   }
 
   async _3commasSend(opts) {
-    const body = new FormData
-    body.append("marketplace_item_id", this._3commas_id)
-    body.append("pair", opts.symbol.replace('/', '_'))
-    body.append("exchange", opts.exchange === 'hitbtc2'
+    const pair = opts.symbol.replace('/', '_')
+    const exchange = opts.exchange === 'hitbtc2'
       ? 'hitbtc'
       : opts.exchange === 'huobipro'
         ? 'huobi'
-        : opts.exchange)
+        : opts.exchange
+    const time = Date.now()
+    const body = new FormData
+    body.append("marketplace_item_id", this._3commas_id)
+    body.append("pair", pair)
+    body.append("exchange", exchange)
     body.append("direction", "long")
-    body.append("date_param", Date.now())
-    const check_string = `#{params[:${body.get('pair')}]}#{params[:${body.get('exchange')}]}#{params[:${body.get('direction')}]}#{params[:${body.get('marketplace_item_id')}]}{params[:${body.get('date_param')}]}`
+    body.append("date_param", time)
+    const check_string = `#{params[:${pair}]}#{params[:${exchange}]}#{params[:'long']}#{params[:${this._3commas_id}]}{params[:${time}]}`
     const sign = this.hashSignature(check_string, this._3commas_key)
     body.append("sign", sign)
 

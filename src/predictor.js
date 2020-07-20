@@ -166,7 +166,7 @@ class Predictor {
     body.append("sign", sign)
 
     try {
-      const req = await fetch("https://3commas.io/signals/v1/publish_bot_signal", {
+      const req = await fetch("https://api.3commas.io/signals/v1/publish_bot_signal", {
         body,
         method: "POST"
       })

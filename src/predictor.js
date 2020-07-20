@@ -147,30 +147,27 @@ class Predictor {
   }
 
   async _3commasSend(opts) {
-    const pair = opts.symbol.replace('/', '_')
+    const symbol = opts.symbol.split('/')
+    const pair = `${symbol[1]}_${symbol[0]}`
     const exchange = opts.exchange === 'hitbtc2'
       ? 'hitbtc'
       : opts.exchange === 'huobipro'
         ? 'huobi'
         : opts.exchange
-    const time = Date.now()
-    const body = new FormData
+    const time = Date.now() / 1000
+    const body = new FormData()
     body.append("marketplace_item_id", this._3commas_id)
     body.append("pair", pair)
     body.append("exchange", exchange)
     body.append("direction", "long")
     body.append("date_param", time)
-    const check_string = `#{params[:${pair}]}#{params[:${exchange}]}#{params[:'long']}#{params[:${this._3commas_id}]}{params[:${time}]}`
-    const sign = this.hashSignature(check_string, this._3commas_key)
+    const check_string = `${pair}${exchange}long${this._3commas_id}${time}`
+    const sign = this.hashSignature(check_string, this._3commas_key, 'sha256')
     body.append("sign", sign)
 
     try {
       const req = await fetch("https://3commas.io/signals/v1/publish_bot_signal", {
         body,
-        headers: {
-          "Cache-Control": "no-cache",
-          "Content-Type": "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW"
-        },
         method: "POST"
       })
       const res = await req
@@ -182,8 +179,8 @@ class Predictor {
     return
   }
 
-  hashSignature(value, key) {
-    const hmac = crypto.createHmac('sha512', key)
+  hashSignature(value, key, algo = 'sha512') {
+    const hmac = crypto.createHmac(algo, key)
     const signature = hmac.update(value)
     return signature.digest('hex')
   }

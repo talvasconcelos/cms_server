@@ -11,31 +11,36 @@ const crypto = require('crypto')
 const FormData = require('form-data')
 
 const _3commasSend = async (opts) => {
-  const pair = opts.symbol.replace('/', '_')
+  const symbol = opts.symbol.split('/')
+  const pair = `${symbol[1]}_${symbol[0]}`
   const exchange = opts.exchange === 'hitbtc2'
     ? 'hitbtc'
     : opts.exchange === 'huobipro'
       ? 'huobi'
       : opts.exchange
-  const time = Date.now()
+  const time = Date.now() / 1000
   const key = 'd9c6572b60d6d279ca4d055b530fc8a02d7ef1c315cb7d0ae6d4be6e2ff8ddc1c86eaa5789d986147434a6406880cdb72efa'
-  const body = new FormData
+  const body = new FormData()
   body.append("marketplace_item_id", 141)
   body.append("pair", pair)
   body.append("exchange", exchange)
   body.append("direction", "long")
   body.append("date_param", time)
-  const check_string = `#{params[:${pair}]}#{params[:${exchange}]}#{params[:'long']}#{params[:141]}{params[:${time}]}`
-  const sign = hashSignature(check_string, key)
+  const check_string = `${pair}${exchange}long141${time}`
+  const sign = hashSignature(check_string, key, 'sha256')
+  console.log(time, sign)
   body.append("sign", sign)
+  //body.setBoundary('----WebKitFormBoundary7MA4YWxkTrZu0gW')
+
+  console.log(body.getHeaders())
 
   try {
-    const req = await fetch("https://3commas.io/signals/v1/publish_bot_signal", {
+    const req = await fetch("https://api.3commas.io/signals/v1/publish_bot_signal", {
       body,
-      headers: {
-        "Cache-Control": "no-cache",
-        "Content-Type": "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW"
-      },
+      // headers: {
+      //   "Cache-Control": "no-cache",
+      //   "Content-Type": "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW"
+      // },
       method: "POST"
     })
     const res = await req
@@ -47,8 +52,8 @@ const _3commasSend = async (opts) => {
   return
 }
 
-function hashSignature(value, key) {
-  const hmac = crypto.createHmac('sha512', key)
+function hashSignature(value, key, algo = 'sha512') {
+  const hmac = crypto.createHmac(algo, key)
   const signature = hmac.update(value)
   return signature.digest('hex')
 }

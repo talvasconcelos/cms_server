@@ -13,7 +13,7 @@ const pred = new Predictor()
 
 const { PORT = 3000 } = process.env
 
-let PAIR_CACHE = null
+let PAIR_CACHE = {}
 
 app.get('/', (req, res) => {
   res.end('Hello')
@@ -61,7 +61,7 @@ scanner.on('aiPairs', async aipairs => {
   if (scanner.hour) {
     PAIR_CACHE = aiMsg
   } else {
-    PAIR_CACHE.data = aiMsg.data || []
+    PAIR_CACHE.data = aiMsg.data
     PAIR_CACHE.timestamp = aiMsg.timestamp
     PAIR_CACHE.ai = aiMsg.ai
   }

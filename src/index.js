@@ -85,17 +85,23 @@ scanner.on('aiPairs', async aipairs => {
   console.log('MSG', aiMsg)
 })
 
-async function sendTweet(tweet) {
-  return await client.post('statuses/update', { status: tweet })
-    .then(function (tweet) {
-      return
-    })
-    .catch(function (error) {
-      throw error;
-    })
+function sendTweet(tweet) {
+  client.post('statuses/update', { status: tweet }, function (error, tweet, response) {
+    if (error) throw error;
+    console.log(tweet);  // Tweet body.
+    console.log(response);  // Raw response object.
+    return
+  });
+  // return await client.post('statuses/update', { status: tweet })
+  //   .then(function (tweet) {
+  //     return
+  //   })
+  //   .catch(function (error) {
+  //     throw error;
+  //   })
 }
 
-const rrr = {
+/*const rrr = {
   timestamp: 1596119714778,
   aidata: [
     {
@@ -530,5 +536,5 @@ const rrr = {
       timestamp: 1596119714736,
     },
   ],
-}
+}*/
 

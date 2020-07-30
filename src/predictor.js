@@ -171,7 +171,7 @@ class Predictor {
         method: "POST"
       })
       const res = await req
-      console.log(res)
+      console.log(JSON.stringify(res))
 
     } catch (e) {
       console.error(e)

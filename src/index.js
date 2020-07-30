@@ -39,7 +39,7 @@ WS.wss.on('connection', ws => {
     ws.send(JSON.stringify(PAIR_CACHE))
   }
 })
-sendTweet(`This a test!\n\n Check out https://coinmarketscanner.app/\n #bitcoin`)
+sendTweet(`This a test at ${Date.now()}!\n\n Check out https://coinmarketscanner.app/\n #bitcoin`)
 // scanner.startScanner({ test: true, time: 20000 });
 scanner.startScanner()
 

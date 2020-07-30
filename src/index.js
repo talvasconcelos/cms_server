@@ -39,7 +39,7 @@ WS.wss.on('connection', ws => {
     ws.send(JSON.stringify(PAIR_CACHE))
   }
 })
-
+sendTweet(`This a test!\n\n Check out https://coinmarketscanner.app/\n #bitcoin`)
 // scanner.startScanner({ test: true, time: 20000 });
 scanner.startScanner()
 
@@ -82,7 +82,6 @@ scanner.on('aiPairs', async aipairs => {
       sendTweet(_tweet)
     }
   }
-  sendTweet(`This a test!\n\n Check out https://coinmarketscanner.app/\n #bitcoin`)
   console.log('MSG', aiMsg)
 })
 

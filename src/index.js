@@ -32,16 +32,16 @@ let PAIR_CACHE = {}
 
 const cache = mem.get('pairs', (err, value, key) => {
   if(err) {
-    return {}
+    console.error(err)
   }
-  console.log(value);
-  if(value){
+  console.log('cache value', value);
+  if(value != null){
     return value
   }
-  return {}
+  return false
 })
 
-PAIR_CACHE = cache
+PAIR_CACHE = Promise.resolve(cache) || {}
 console.log({PAIR_CACHE})
 
 app.get('/', (req, res) => {

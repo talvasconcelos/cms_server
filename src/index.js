@@ -30,18 +30,19 @@ const client = new Twitter({
 
 let PAIR_CACHE = {}
 
-const cache = mem.get('pairs', async (err, value, key) => {
+const cache = mem.get('pairs', (err, value, key) => {
   if(err) {
     return {}
   }
-  if(value != null){
-    console.log(value);
+  console.log(value);
+  if(value){
     return value
   }
   return {}
 })
 
 PAIR_CACHE = cache
+console.log({PAIR_CACHE})
 
 app.get('/', (req, res) => {
   res.end('Hello')

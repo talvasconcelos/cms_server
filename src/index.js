@@ -30,7 +30,7 @@ const client = new Twitter({
 
 let PAIR_CACHE = {}
 
-const cache = mem.get('pairs', (err, value) => {
+mem.get('pairs', (err, value) => {
   if(err) {
     console.error(err)
   }
@@ -39,10 +39,8 @@ const cache = mem.get('pairs', (err, value) => {
     console.log('cache value', value);
     PAIR_CACHE = value
   }
-  return false
 })
 
-console.log({PAIR_CACHE})
 
 app.get('/', (req, res) => {
   res.end('Hello')
@@ -57,6 +55,7 @@ const WS = require('./websocket')({ server: app.server })
 
 WS.wss.on('connection', ws => {
   if (PAIR_CACHE) {
+    console.log({PAIR_CACHE})
     ws.send(JSON.stringify(PAIR_CACHE))
   }
 })

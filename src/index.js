@@ -28,17 +28,20 @@ const client = new Twitter({
   access_token_secret: process.env.TWITTER_ACCESS_SECRET
 });
 
+let PAIR_CACHE = {}
+
 const cache = mem.get('pairs', async (err, value, key) => {
   if(err) {
     return {}
   }
   if(value != null){
+    console.log(value);
     return value
   }
   return {}
 })
 
-let PAIR_CACHE = cache
+PAIR_CACHE = cache
 
 app.get('/', (req, res) => {
   res.end('Hello')

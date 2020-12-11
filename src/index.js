@@ -4,6 +4,12 @@ require('heroku-self-ping').default('https://market-scanner.herokuapp.com/', {
 
 const polka = require('polka')
 const app = polka()
+const memjs = require('memjs')
+
+const mem = memjs.Client.create(process.env.MEMCACHEDCLOUD_SERVERS, {
+  username: process.env.MEMCACHEDCLOUD_USERNAME,
+  password: process.env.MEMCACHEDCLOUD_PASSWORD
+});
 
 const Predictor = require('./predictor')
 const Scanner = require('./scanner')
@@ -22,7 +28,17 @@ const client = new Twitter({
   access_token_secret: process.env.TWITTER_ACCESS_SECRET
 });
 
-let PAIR_CACHE = {}
+const cache = mem.get('pairs', async (err, value, key) => {
+  if(err) {
+    return {}
+  }
+  if(value != null){
+    return value
+  }
+  return {}
+})
+
+let PAIR_CACHE = cache
 
 app.get('/', (req, res) => {
   res.end('Hello')
@@ -73,6 +89,7 @@ scanner.on('aiPairs', async aipairs => {
     PAIR_CACHE.timestamp = aiMsg.timestamp
     PAIR_CACHE.ai = aiMsg.ai
   }
+  mem.set('pairs', PAIR_CACHE)
 
   WS.broadcastWS(aiMsg)
   if (scanner.hour && pred.preds.length) {

@@ -66,7 +66,7 @@ class Predictor {
     X.dispose()
     AEX.dispose()
     AEXX.dispose()
-    if (P < 0.9 || isNaN(P)) {
+    if (P < 0.95 || isNaN(P)) {
       // console.log(`Skipped ${opts.exchange} / ${opts.pair} | Prob: ${P}`);
       return
     }

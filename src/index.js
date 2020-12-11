@@ -92,7 +92,7 @@ scanner.on('aiPairs', async aipairs => {
     PAIR_CACHE.timestamp = aiMsg.timestamp
     PAIR_CACHE.ai = aiMsg.ai
   }
-  mem.set('pairs', PAIR_CACHE)
+  mem.set('pairs', PAIR_CACHE, {})
 
   WS.broadcastWS(aiMsg)
   if (scanner.hour && pred.preds.length) {

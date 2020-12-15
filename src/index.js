@@ -91,7 +91,9 @@ scanner.on("aiPairs", async (aipairs) => {
     PAIR_CACHE.timestamp = aiMsg.timestamp;
     PAIR_CACHE.ai = aiMsg.ai;
   }
-  mem.set("pairs", Buffer.from(JSON.stringify(PAIR_CACHE)), {});
+  if (PAIR_CACHE.data.length) {
+    mem.set("pairs", Buffer.from(JSON.stringify(PAIR_CACHE)), {});
+  }
 
   WS.broadcastWS(aiMsg);
   if (scanner.hour && pred.preds.length) {

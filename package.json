@@ -13,7 +13,7 @@
     "form-data": "^3.0.0",
     "heroku-self-ping": "2.0.1",
     "memjs": "^1.2.2",
-    "node-fetch": "2.6.0",
+    "node-fetch": "3.1.1",
     "polka": "0.5.2",
     "request": "2.88.2",
     "twitter": "^1.7.1",
